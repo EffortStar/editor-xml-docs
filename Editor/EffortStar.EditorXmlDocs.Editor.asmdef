@@ -1,0 +1,10 @@
+{
+  "name": "EffortStar.EditorXmlDocs.Editor",
+  "rootNamespace": "EffortStar.EditorXmlDocs.Editor",
+  "references": [
+    "EffortStar.EditorXmlDocs.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

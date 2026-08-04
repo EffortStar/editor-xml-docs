@@ -1,0 +1,7 @@
+.effortstar-inline-doc {
+  background-color: #292929;
+  padding: 4px;
+  margin: 2px 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
