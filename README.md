@@ -12,7 +12,7 @@ Add the package from its Git URL in Unity Package Manager:
 https://github.com/EffortStar/editor-xml-docs.git
 ```
 
-The package requires Unity 6 or later.
+The package requires Unity 2022.2.2f1 or later.
 
 ## Usage
 
