@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Xml;
 
@@ -31,7 +32,9 @@ namespace EffortStar.EditorXmlDocs.Editor {
       try {
         document.LoadXml($"<root>{xml}</root>");
       } catch (XmlException) {
-        return Normalize(EscapeText(xml));
+        var fallback = new StringBuilder();
+        AppendText(fallback, xml);
+        return Normalize(fallback.ToString());
       }
 
       var output = new StringBuilder();
@@ -65,8 +68,9 @@ namespace EffortStar.EditorXmlDocs.Editor {
 
     private static void AppendText(StringBuilder output, string value) {
       var whitespacePending = false;
+      output.Append("<noparse>");
 
-      foreach (var character in value) {
+      foreach (var character in WebUtility.HtmlDecode(value)) {
         if (char.IsWhiteSpace(character)) {
           whitespacePending = true;
           continue;
@@ -82,7 +86,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
         }
 
         whitespacePending = false;
-        output.Append(EscapeText(character.ToString()));
+        output.Append(character);
       }
 
       if (
@@ -93,6 +97,8 @@ namespace EffortStar.EditorXmlDocs.Editor {
       ) {
         output.Append(' ');
       }
+
+      output.Append("</noparse>");
     }
 
     private static void AppendElement(StringBuilder output, XmlElement element) {
