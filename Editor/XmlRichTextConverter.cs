@@ -154,6 +154,9 @@ namespace EffortStar.EditorXmlDocs.Editor {
         case "a":
           AppendTag(output, element, "a", preserveAttributes: true);
           return;
+        case "br":
+          AppendLineBreak(output);
+          return;
         case "b":
         case "i":
           AppendTag(output, element, name.ToLowerInvariant(), preserveAttributes: false);
