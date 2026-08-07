@@ -33,9 +33,11 @@ namespace EffortStar.EditorXmlDocs.Editor {
         document.LoadXml($"<root>{xml}</root>");
       } catch (XmlException) {
         var fallback = new StringBuilder();
-        AppendText(fallback, xml);
+        AppendText(fallback, xml.Trim());
         return Normalize(fallback.ToString());
       }
+
+      TrimBoundaryWhitespace(document.DocumentElement!);
 
       var output = new StringBuilder();
 
@@ -44,6 +46,43 @@ namespace EffortStar.EditorXmlDocs.Editor {
       }
 
       return Normalize(output.ToString());
+    }
+
+    private static void TrimBoundaryWhitespace(XmlElement root) {
+      var textNodes = new List<XmlNode>();
+      CollectTextNodes(root, textNodes);
+
+      foreach (var textNode in textNodes) {
+        var trimmed = textNode.Value?.TrimStart() ?? string.Empty;
+        textNode.Value = trimmed;
+        if (trimmed.Length > 0) {
+          break;
+        }
+      }
+
+      for (var index = textNodes.Count - 1; index >= 0; index--) {
+        var trimmed = textNodes[index].Value?.TrimEnd() ?? string.Empty;
+        textNodes[index].Value = trimmed;
+        if (trimmed.Length > 0) {
+          break;
+        }
+      }
+    }
+
+    private static void CollectTextNodes(XmlNode node, List<XmlNode> output) {
+      if (
+        node is XmlText or
+        XmlWhitespace or
+        XmlSignificantWhitespace or
+        XmlCDataSection
+      ) {
+        output.Add(node);
+        return;
+      }
+
+      foreach (XmlNode child in node.ChildNodes) {
+        CollectTextNodes(child, output);
+      }
     }
 
     private static void AppendNode(StringBuilder output, XmlNode node) {
