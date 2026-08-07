@@ -167,17 +167,40 @@ namespace EffortStar.EditorXmlDocs.Editor {
         case "em":
           AppendTag(output, element, "i", preserveAttributes: false);
           return;
-        case "h1":
+        case string n when ToHeading(n) is {} heading:
           AppendParagraphBreak(output);
-          output.Append("<style=\"h1\">");
+          output.Append($"<b><size={HeadingSize(heading)}>");
           AppendChildren(output, element);
-          output.Append("</style>");
+          output.AppendLine("</size></b>");
           AppendParagraphBreak(output);
           return;
         default:
           AppendChildren(output, element);
           return;
       }
+    }
+
+    static string HeadingSize(int heading) => heading switch {
+      6 => "1.1em",
+      5 => "1.2em",
+      4 => "1.3em",
+      3 => "1.4em",
+      2 => "1.5em",
+      1 => "2em",
+      _ => "1em"
+    };
+
+    static int? ToHeading(string name) =>
+      name.Length == 2 && name[0] == 'h' && char.IsDigit(name[1])
+        ? name[1] - '0'
+        : null;
+
+    private static void AppendLineBreak(StringBuilder output) {
+      while (output.Length > 0 && (output[^1] == ' ' || output[^1] == '\t')) {
+        output.Length--;
+      }
+
+      output.Append('\n');
     }
 
     private static void AppendTag(
