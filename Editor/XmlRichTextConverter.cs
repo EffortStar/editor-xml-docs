@@ -7,6 +7,7 @@ using System.Xml;
 namespace EffortStar.EditorXmlDocs.Editor {
   internal static class XmlRichTextConverter {
     static readonly HashSet<string> ParagraphElements = new(StringComparer.OrdinalIgnoreCase) {
+      "code",
       "description",
       "example",
       "exception",
