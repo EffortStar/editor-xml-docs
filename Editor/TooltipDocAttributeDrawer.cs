@@ -8,19 +8,17 @@ namespace EffortStar.EditorXmlDocs.Editor {
   public sealed class TooltipDocAttributeDrawer : PropertyDrawer {
     public override VisualElement CreatePropertyGUI(SerializedProperty property) {
       var propertyField = new PropertyField(property, preferredLabel);
-      var comment = DocUtility.GetComment(fieldInfo);
-      var hasDocumentationFile = DocUtility.HasDocumentationFile(fieldInfo);
+      var richText = RichTextCache.Get(fieldInfo);
 
-      if (comment is { Length: > 0 }) {
-        propertyField.tooltip = XmlRichTextConverter.Convert(comment);
-      } else if (hasDocumentationFile) {
-        propertyField.tooltip = InlineDocAttributeDrawer.NoDocComment;
+      if (richText != null) {
+        propertyField.tooltip = richText;
       }
 
-      if (
-        DocUtility.GetAssembly(fieldInfo) is not { } assembly ||
-        hasDocumentationFile
-      ) {
+      if (richText != null) {
+        return propertyField;
+      }
+
+      if (DocUtility.GetAssembly(fieldInfo) is not { } assembly) {
         return propertyField;
       }
 
@@ -31,12 +29,10 @@ namespace EffortStar.EditorXmlDocs.Editor {
     }
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-      var comment = DocUtility.GetComment(fieldInfo);
-      var assembly = DocUtility.GetAssembly(fieldInfo);
+      var richText = RichTextCache.Get(fieldInfo);
       if (
-        comment is not { Length: > 0 } &&
-        assembly != null &&
-        !DocUtility.HasDocumentationFile(fieldInfo)
+        richText == null &&
+        DocUtility.GetAssembly(fieldInfo) is { } assembly
       ) {
         var warningPosition = new Rect(
           position.x,
@@ -49,11 +45,9 @@ namespace EffortStar.EditorXmlDocs.Editor {
         position.height = EditorGUI.GetPropertyHeight(property, label, includeChildren: true);
       }
 
-      var propertyLabel = comment is { Length: > 0 }
-        ? new GUIContent(label.text, label.image, XmlRichTextConverter.Convert(comment))
-        : DocUtility.HasDocumentationFile(fieldInfo)
-          ? new GUIContent(label.text, label.image, InlineDocAttributeDrawer.NoDocComment)
-          : label;
+      var propertyLabel = richText != null
+        ? new GUIContent(label.text, label.image, richText)
+        : label;
 
       EditorGUI.PropertyField(position, property, propertyLabel, includeChildren: true);
     }
@@ -61,8 +55,8 @@ namespace EffortStar.EditorXmlDocs.Editor {
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
       var propertyHeight = EditorGUI.GetPropertyHeight(property, label, includeChildren: true);
       if (
-        DocUtility.GetAssembly(fieldInfo) != null &&
-        !DocUtility.HasDocumentationFile(fieldInfo)
+        RichTextCache.Get(fieldInfo) == null &&
+        DocUtility.GetAssembly(fieldInfo) != null
       ) {
         return
           MissingXmlDocumentation.ImguiHeight +

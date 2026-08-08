@@ -9,21 +9,16 @@ namespace EffortStar.EditorXmlDocs.Editor {
     const string StyleSheetPath =
       "Packages/games.effortstar.editor-xml-docs/Editor/InlineDoc.uss";
     const string InlineDocClass = "effortstar-inline-doc";
-    internal const string NoDocComment = "No doc comment.";
 
     static StyleSheet? _styleSheet;
     static GUIStyle? _imguiStyle;
 
     public override VisualElement CreatePropertyGUI(SerializedProperty property) {
       var root = new VisualElement();
-      var comment = DocUtility.GetComment(fieldInfo);
-      var hasDocumentationFile = DocUtility.HasDocumentationFile(fieldInfo);
+      var richText = RichTextCache.Get(fieldInfo);
 
-      if (comment is { Length: > 0 } || hasDocumentationFile) {
-        var text = comment is { Length: > 0 }
-          ? XmlRichTextConverter.Convert(comment)
-          : NoDocComment;
-        var commentLabel = new Label(text) {
+      if (richText != null) {
+        var commentLabel = new Label(richText) {
           enableRichText = true
         };
         commentLabel.AddToClassList(InlineDocClass);
@@ -43,13 +38,13 @@ namespace EffortStar.EditorXmlDocs.Editor {
     }
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-      var comment = DocUtility.GetComment(fieldInfo);
-      var assembly = DocUtility.GetAssembly(fieldInfo);
-      if (
-        comment is not { Length: > 0 } &&
-        assembly != null &&
-        !DocUtility.HasDocumentationFile(fieldInfo)
-      ) {
+      var richText = RichTextCache.Get(fieldInfo);
+      if (richText == null) {
+        if (DocUtility.GetAssembly(fieldInfo) is not { } assembly) {
+          EditorGUI.PropertyField(position, property, label, includeChildren: true);
+          return;
+        }
+
         var warningPosition = new Rect(
           position.x,
           position.y,
@@ -73,11 +68,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
         return;
       }
 
-      if (comment is not { Length: > 0 }) {
-        comment = NoDocComment;
-      }
-
-      var content = new GUIContent(XmlRichTextConverter.Convert(comment));
+      var content = new GUIContent(richText);
       var commentHeight = GetCommentHeight(content, position.width);
       var commentPosition = new Rect(position.x, position.y, position.width, commentHeight);
       GUI.Label(commentPosition, content, GetImguiStyle());
@@ -93,23 +84,17 @@ namespace EffortStar.EditorXmlDocs.Editor {
 
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
       var propertyHeight = EditorGUI.GetPropertyHeight(property, label, includeChildren: true);
-      var comment = DocUtility.GetComment(fieldInfo);
-      if (
-        !DocUtility.HasDocumentationFile(fieldInfo) &&
-        DocUtility.GetAssembly(fieldInfo) != null
-      ) {
-        return
-          MissingXmlDocumentation.ImguiHeight +
-          EditorGUIUtility.standardVerticalSpacing +
-          propertyHeight;
-      }
-
-      if (comment is not { Length: > 0 }) {
-        comment = NoDocComment;
+      var richText = RichTextCache.Get(fieldInfo);
+      if (richText == null) {
+        return DocUtility.GetAssembly(fieldInfo) != null
+          ? MissingXmlDocumentation.ImguiHeight +
+            EditorGUIUtility.standardVerticalSpacing +
+            propertyHeight
+          : propertyHeight;
       }
 
       var width = Mathf.Max(1f, EditorGUIUtility.currentViewWidth - 40f);
-      var content = new GUIContent(XmlRichTextConverter.Convert(comment));
+      var content = new GUIContent(richText);
       return
         GetCommentHeight(content, width) +
         EditorGUIUtility.standardVerticalSpacing +
