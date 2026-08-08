@@ -10,8 +10,6 @@ namespace EffortStar.EditorXmlDocs.Editor {
       "description",
       "example",
       "exception",
-      "item",
-      "list",
       "para",
       "remarks",
       "returns",
