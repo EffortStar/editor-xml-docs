@@ -143,6 +143,11 @@ namespace EffortStar.EditorXmlDocs.Editor {
     static void AppendElement(StringBuilder output, XmlElement element) {
       var name = element.LocalName;
 
+      if (name.Equals("list", StringComparison.OrdinalIgnoreCase)) {
+        AppendList(output, element);
+        return;
+      }
+
       if (ParagraphElements.Contains(name)) {
         AppendParagraphBreak(output);
         AppendChildren(output, element);
@@ -178,6 +183,81 @@ namespace EffortStar.EditorXmlDocs.Editor {
           AppendChildren(output, element);
           return;
       }
+    }
+
+    static void AppendList(StringBuilder output, XmlElement list) {
+      var numbered = list
+        .GetAttribute("type")
+        .Equals("number", StringComparison.OrdinalIgnoreCase);
+      var itemNumber = 1;
+      var hasItems = false;
+
+      foreach (XmlNode child in list.ChildNodes) {
+        if (
+          child is not XmlElement item ||
+          !item.LocalName.Equals("item", StringComparison.OrdinalIgnoreCase)
+        ) {
+          continue;
+        }
+
+        if (!hasItems) {
+          AppendParagraphBreak(output);
+          hasItems = true;
+        } else {
+          AppendLineBreak(output);
+        }
+
+        AppendText(output, numbered ? $"{itemNumber}. " : "• ");
+        AppendListItem(output, item);
+        itemNumber++;
+      }
+
+      if (hasItems) {
+        AppendParagraphBreak(output);
+      }
+    }
+
+    static void AppendListItem(StringBuilder output, XmlElement item) {
+      var term = GetChildElement(item, "term");
+      var description = GetChildElement(item, "description");
+
+      if (description == null) {
+        if (term != null) {
+          output.Append("<b>");
+          AppendTrimmedChildren(output, term);
+          output.Append("</b>");
+        } else {
+          AppendTrimmedChildren(output, item);
+        }
+
+        return;
+      }
+
+      if (term != null) {
+        output.Append("<b>");
+        AppendTrimmedChildren(output, term);
+        output.Append("</b>");
+        AppendText(output, " — ");
+      }
+
+      AppendTrimmedChildren(output, description);
+    }
+
+    static XmlElement? GetChildElement(XmlElement parent, string name) {
+      foreach (XmlNode child in parent.ChildNodes) {
+        if (
+          child is XmlElement element &&
+          element.LocalName.Equals(name, StringComparison.OrdinalIgnoreCase)
+        ) {
+          return element;
+        }
+      }
+
+      return null;
+    }
+
+    static void AppendTrimmedChildren(StringBuilder output, XmlElement element) {
+      output.Append(Convert(element.InnerXml));
     }
 
     static string HeadingSize(int heading) => heading switch {
