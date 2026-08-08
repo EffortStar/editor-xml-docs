@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace EffortStar.EditorXmlDocs.Editor {
   internal static class XmlRichTextConverter {
-    private static readonly HashSet<string> ParagraphElements = new(StringComparer.OrdinalIgnoreCase) {
+    static readonly HashSet<string> ParagraphElements = new(StringComparer.OrdinalIgnoreCase) {
       "description",
       "example",
       "exception",
@@ -48,7 +48,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       return Normalize(output.ToString());
     }
 
-    private static void TrimBoundaryWhitespace(XmlElement root) {
+    static void TrimBoundaryWhitespace(XmlElement root) {
       var textNodes = new List<XmlNode>();
       CollectTextNodes(root, textNodes);
 
@@ -69,7 +69,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       }
     }
 
-    private static void CollectTextNodes(XmlNode node, List<XmlNode> output) {
+    static void CollectTextNodes(XmlNode node, List<XmlNode> output) {
       if (
         node is XmlText or
         XmlWhitespace or
@@ -85,7 +85,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       }
     }
 
-    private static void AppendNode(StringBuilder output, XmlNode node) {
+    static void AppendNode(StringBuilder output, XmlNode node) {
       switch (node) {
         case XmlText text:
           AppendText(output, text.Value);
@@ -105,7 +105,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       }
     }
 
-    private static void AppendText(StringBuilder output, string value) {
+    static void AppendText(StringBuilder output, string value) {
       var whitespacePending = false;
       output.Append("<noparse>");
 
@@ -140,7 +140,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       output.Append("</noparse>");
     }
 
-    private static void AppendElement(StringBuilder output, XmlElement element) {
+    static void AppendElement(StringBuilder output, XmlElement element) {
       var name = element.LocalName;
 
       if (ParagraphElements.Contains(name)) {
@@ -195,7 +195,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
         ? name[1] - '0'
         : null;
 
-    private static void AppendLineBreak(StringBuilder output) {
+    static void AppendLineBreak(StringBuilder output) {
       while (output.Length > 0 && (output[^1] == ' ' || output[^1] == '\t')) {
         output.Length--;
       }
@@ -203,7 +203,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       output.Append('\n');
     }
 
-    private static void AppendTag(
+    static void AppendTag(
       StringBuilder output,
       XmlElement element,
       string outputName,
@@ -227,13 +227,13 @@ namespace EffortStar.EditorXmlDocs.Editor {
       output.Append("</").Append(outputName).Append('>');
     }
 
-    private static void AppendChildren(StringBuilder output, XmlElement element) {
+    static void AppendChildren(StringBuilder output, XmlElement element) {
       foreach (XmlNode child in element.ChildNodes) {
         AppendNode(output, child);
       }
     }
 
-    private static void AppendParagraphBreak(StringBuilder output) {
+    static void AppendParagraphBreak(StringBuilder output) {
       while (output.Length > 0 && (output[^1] == ' ' || output[^1] == '\t')) {
         output.Length--;
       }
@@ -249,7 +249,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       }
     }
 
-    private static string Normalize(string value) {
+    static string Normalize(string value) {
       var output = new StringBuilder(value.Length);
       var newlineCount = 0;
 
@@ -288,14 +288,14 @@ namespace EffortStar.EditorXmlDocs.Editor {
       return output.ToString().Trim();
     }
 
-    private static string EscapeText(string value) {
+    static string EscapeText(string value) {
       return value
         .Replace("&", "&amp;")
         .Replace("<", "&lt;")
         .Replace(">", "&gt;");
     }
 
-    private static string EscapeAttribute(string value) {
+    static string EscapeAttribute(string value) {
       return EscapeText(value).Replace("\"", "&quot;");
     }
   }

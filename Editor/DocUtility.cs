@@ -6,9 +6,9 @@ using System.Xml;
 
 namespace EffortStar.EditorXmlDocs.Editor {
   internal static class DocUtility {
-    private static readonly Dictionary<Assembly, CachedDocument> _documents = new();
+    static readonly Dictionary<Assembly, CachedDocument> _documents = new();
 
-    private sealed class CachedDocument {
+    sealed class CachedDocument {
       public readonly string Path;
       public readonly DateTime LastWriteTimeUtc;
       public readonly long Length;
@@ -45,7 +45,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       return field?.DeclaringType?.Assembly;
     }
 
-    private static XmlDocument? GetDocument(Assembly assembly) {
+    static XmlDocument? GetDocument(Assembly assembly) {
       var documentationPath = GetDocumentationPath(assembly);
       if (documentationPath == null) {
         _documents.Remove(assembly);
@@ -84,7 +84,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       }
     }
 
-    private static string? GetDocumentationPath(Assembly assembly) {
+    static string? GetDocumentationPath(Assembly assembly) {
       var assemblyName = assembly.GetName().Name;
       if (!string.IsNullOrEmpty(assemblyName)) {
         var libraryPath = Path.GetFullPath(Path.Combine("Library", $"{assemblyName}.xml"));
@@ -102,11 +102,11 @@ namespace EffortStar.EditorXmlDocs.Editor {
       return File.Exists(adjacentPath) ? adjacentPath : null;
     }
 
-    private static string GetDocumentationTypeName(Type type) {
+    static string GetDocumentationTypeName(Type type) {
       return (type.FullName ?? type.Name).Replace('+', '.');
     }
 
-    private static string ToXPathLiteral(string value) {
+    static string ToXPathLiteral(string value) {
       if (!value.Contains("'")) {
         return $"'{value}'";
       }

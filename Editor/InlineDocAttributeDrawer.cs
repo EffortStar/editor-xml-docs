@@ -6,13 +6,13 @@ using UnityEngine.UIElements;
 namespace EffortStar.EditorXmlDocs.Editor {
   [CustomPropertyDrawer(typeof(InlineDocAttribute))]
   public sealed class InlineDocAttributeDrawer : PropertyDrawer {
-    private const string StyleSheetPath =
+    const string StyleSheetPath =
       "Packages/games.effortstar.editor-xml-docs/Editor/InlineDoc.uss";
-    private const string InlineDocClass = "effortstar-inline-doc";
+    const string InlineDocClass = "effortstar-inline-doc";
     internal const string NoDocComment = "No doc comment.";
 
-    private static StyleSheet? styleSheet;
-    private static GUIStyle? imguiStyle;
+    static StyleSheet? _styleSheet;
+    static GUIStyle? _imguiStyle;
 
     public override VisualElement CreatePropertyGUI(SerializedProperty property) {
       var root = new VisualElement();
@@ -33,9 +33,9 @@ namespace EffortStar.EditorXmlDocs.Editor {
         root.Add(MissingXmlDocumentation.Create("InlineDoc", assembly));
       }
 
-      styleSheet ??= AssetDatabase.LoadAssetAtPath<StyleSheet>(StyleSheetPath);
-      if (styleSheet != null) {
-        root.styleSheets.Add(styleSheet);
+      _styleSheet ??= AssetDatabase.LoadAssetAtPath<StyleSheet>(StyleSheetPath);
+      if (_styleSheet != null) {
+        root.styleSheets.Add(_styleSheet);
       }
 
       root.Add(new PropertyField(property, preferredLabel));
@@ -116,21 +116,21 @@ namespace EffortStar.EditorXmlDocs.Editor {
         propertyHeight;
     }
 
-    private static float GetCommentHeight(GUIContent content, float width) {
+    static float GetCommentHeight(GUIContent content, float width) {
       return GetImguiStyle().CalcHeight(content, width);
     }
 
-    private static GUIStyle GetImguiStyle() {
-      if (imguiStyle != null) {
-        return imguiStyle;
+    static GUIStyle GetImguiStyle() {
+      if (_imguiStyle != null) {
+        return _imguiStyle;
       }
 
-      imguiStyle = new GUIStyle(EditorStyles.helpBox) {
+      _imguiStyle = new GUIStyle(EditorStyles.helpBox) {
         padding = new RectOffset(2, 2, 2, 2),
         richText = true,
         wordWrap = true
       };
-      return imguiStyle;
+      return _imguiStyle;
     }
 
   }

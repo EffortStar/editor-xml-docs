@@ -61,14 +61,14 @@ namespace EffortStar.EditorXmlDocs.Editor {
       }
     }
 
-    private static string? GetAsmdefPath(ReflectionAssembly assembly) {
+    static string? GetAsmdefPath(ReflectionAssembly assembly) {
       var assemblyName = assembly.GetName().Name;
       return string.IsNullOrEmpty(assemblyName)
         ? null
         : CompilationPipeline.GetAssemblyDefinitionFilePathFromAssemblyName(assemblyName);
     }
 
-    private static string GetMessage(
+    static string GetMessage(
       string attributeName,
       ReflectionAssembly assembly,
       string? asmdefPath
@@ -79,7 +79,7 @@ namespace EffortStar.EditorXmlDocs.Editor {
       return $"[{attributeName}] did not find an XML file. {asmdefName} may not be configured.";
     }
 
-    private static void Fix(ReflectionAssembly assembly, string? asmdefPath) {
+    static void Fix(ReflectionAssembly assembly, string? asmdefPath) {
       if (asmdefPath == null) {
         return;
       }
@@ -120,14 +120,14 @@ namespace EffortStar.EditorXmlDocs.Editor {
       CompilationPipeline.RequestScriptCompilation();
     }
 
-    private static bool IsDocumentationArgument(string line) {
+    static bool IsDocumentationArgument(string line) {
       var trimmed = line.TrimStart();
       return
         trimmed.StartsWith("-doc:", StringComparison.OrdinalIgnoreCase) ||
         trimmed.StartsWith("/doc:", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool DisablesMissingDocumentationWarning(string line) {
+    static bool DisablesMissingDocumentationWarning(string line) {
       var trimmed = line.Trim();
       var separator = trimmed.IndexOf(':');
       if (separator < 0) {
